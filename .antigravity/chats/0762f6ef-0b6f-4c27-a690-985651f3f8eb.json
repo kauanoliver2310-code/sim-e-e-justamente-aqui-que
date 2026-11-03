@@ -52,6 +52,18 @@
       "created_at": "2026-11-03T17:23:17.551Z",
       "sender": "ios",
       "is_cancelled": false
+    },
+    {
+      "id": "7278b3fa-b5a4-4fca-b5eb-f81a82030f11",
+      "role": "agent",
+      "content": "It's saved! All changes are committed and automatically synced with your GitHub repository.",
+      "status": "completed",
+      "model": "gemini-3.8-flash-high",
+      "client_type": "gemini-bridge",
+      "parent_message_id": "1ed11b25-0e44-4ce4-bc93-d00039cc0583",
+      "created_at": "2026-11-03T17:24:01.064Z",
+      "sender": "macOS",
+      "is_cancelled": false
     }
   ]
 }
