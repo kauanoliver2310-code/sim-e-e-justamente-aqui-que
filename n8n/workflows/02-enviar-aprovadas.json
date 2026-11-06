@@ -1,0 +1,339 @@
+{
+  "name": "KAUAN 02 - Enviar mensagens aprovadas",
+  "nodes": [
+    {
+      "id": "928730d5-ad01-5e8e-b725-1dea59c5c066",
+      "name": "A cada 2 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "790a492a-77b3-57f3-8aa3-eb9848b203a5",
+      "name": "Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// EDITE AQUI. dry_run=true: nada é enviado de verdade (status vira SIMULADA).\nreturn [{ json: {\n  sheet_id: 'COLE_AQUI_O_ID_DA_PLANILHA',\n  dry_run: true,\n  phone_number_id: 'COLE_AQUI_PHONE_NUMBER_ID_DA_META',\n  graph_versao: 'v23.0', // confira a versão atual no painel da Meta\n  janela_horas: 23,       // resposta grátis só dentro de 24h da última msg do cliente\n} }];\n"
+      }
+    },
+    {
+      "id": "daeace4a-76d3-5b15-bdb4-bffab9dfc6ab",
+      "name": "Ler Aprovacao",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config').first().json.sheet_id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Aprovacao"
+        },
+        "options": {}
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "2c8dcf4e-7efb-5055-b449-cef5e2264fc4",
+      "name": "Hash telefone",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "action": "hash",
+        "type": "SHA256",
+        "value": "={{ String($json.telefone) }}",
+        "dataPropertyName": "telefone_hash"
+      }
+    },
+    {
+      "id": "08bc7306-2ac0-594d-9802-95abf218d3c2",
+      "name": "Ler Supressao",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config').first().json.sheet_id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Supressao"
+        },
+        "options": {}
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "510e7e9c-59f0-57ee-93eb-c0d146accda9",
+      "name": "Selecionar envios",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Só APROVADA sai. Supressão, janela de 24h e envio já feito são checados aqui.\nconst cfg = $('Config').first().json;\nconst st = $getWorkflowStaticData('global');\nst.enviados = st.enviados || [];\nconst sup = new Set($input.all().map(r => String(r.json.chave || '')));\nconst agora = Date.now();\nconst out = [];\nfor (const i of $('Hash telefone').all()) {\n  const j = i.json;\n  if (String(j.status || '').toUpperCase() !== 'APROVADA') continue;\n  const texto = String(j.rascunho || '').trim();\n  const row = { chave: j.chave };\n  if (st.enviados.includes(j.chave)) { row.status = 'ENVIADA'; row.motivo = 'já enviada (idempotência)'; row.acao = 'atualizar'; }\n  else if (!j.aprovado_por) { row.status = 'RASCUNHO'; row.motivo = 'falta preencher aprovado_por'; row.acao = 'atualizar'; }\n  else if (sup.has('telefone:' + j.telefone_hash)) { row.status = 'BLOQUEADA'; row.motivo = 'oposição registrada'; row.acao = 'atualizar'; }\n  else if (!texto) { row.status = 'FILA_HUMANA'; row.motivo = 'rascunho vazio'; row.acao = 'atualizar'; }\n  else if (agora - Date.parse(j.recebido_em) > cfg.janela_horas * 3600e3) {\n    row.status = 'JANELA_EXPIRADA'; row.motivo = 'passou de 24h: exige template pago'; row.acao = 'atualizar';\n  } else if (cfg.dry_run) {\n    row.status = 'SIMULADA'; row.motivo = 'dry_run=true'; row.enviado_em = new Date().toISOString(); row.acao = 'atualizar';\n  } else {\n    out.push({ json: { chave: j.chave, acao: 'enviar', req: {\n      messaging_product: 'whatsapp', to: String(j.telefone), type: 'text', text: { body: texto } } } });\n    continue;\n  }\n  out.push({ json: row });\n}\nreturn out;\n"
+      }
+    },
+    {
+      "id": "602a1d1b-535f-553f-b9c6-c048447d8dec",
+      "name": "Rota envio",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1540,
+        0
+      ],
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 2,
+        "output": "={{ $json.acao === 'enviar' ? 0 : 1 }}"
+      }
+    },
+    {
+      "id": "bce03de2-5f56-58e3-bfec-0bab8bd3fbd1",
+      "name": "WhatsApp enviar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        -100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Config').first().json.graph_versao }}/{{ $('Config').first().json.phone_number_id }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.req) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "60d94987-51eb-5af9-80ae-2ad213a8a513",
+      "name": "Resultado envio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        -100
+      ],
+      "parameters": {
+        "jsCode": "const st = $getWorkflowStaticData('global');\nst.enviados = st.enviados || [];\nconst base = $('Selecionar envios').all().filter(i => i.json.acao === 'enviar');\nreturn $input.all().map((r, k) => {\n  const chave = base[k].json.chave;\n  const id = r.json.messages && r.json.messages[0] && r.json.messages[0].id;\n  if (id) {\n    st.enviados.push(chave);\n    if (st.enviados.length > 5000) st.enviados = st.enviados.slice(-2500);\n    return { json: { chave, status: 'ENVIADA', ref_envio: id, enviado_em: new Date().toISOString(), motivo: '' } };\n  }\n  const erro = r.json.error ? JSON.stringify(r.json.error).slice(0, 300) : 'sem id na resposta';\n  return { json: { chave, status: 'FALHA', motivo: erro } };\n});\n"
+      }
+    },
+    {
+      "id": "5414418d-79cf-54b2-8aa4-b7510254df04",
+      "name": "Limpar campos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        100
+      ],
+      "parameters": {
+        "jsCode": "return $input.all().map(i => { const j = { ...i.json }; delete j.acao; delete j.req; return { json: j }; });"
+      }
+    },
+    {
+      "id": "aa1cc138-48f4-55e2-96a2-9ff7ce23a111",
+      "name": "Atualizar Aprovacao",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2420,
+        0
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config').first().json.sheet_id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Aprovacao"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "chave"
+          ]
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "A cada 2 min": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Ler Aprovacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Aprovacao": {
+      "main": [
+        [
+          {
+            "node": "Hash telefone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hash telefone": {
+      "main": [
+        [
+          {
+            "node": "Ler Supressao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Supressao": {
+      "main": [
+        [
+          {
+            "node": "Selecionar envios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Selecionar envios": {
+      "main": [
+        [
+          {
+            "node": "Rota envio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rota envio": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp enviar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Limpar campos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp enviar": {
+      "main": [
+        [
+          {
+            "node": "Resultado envio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resultado envio": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Aprovacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpar campos": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Aprovacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

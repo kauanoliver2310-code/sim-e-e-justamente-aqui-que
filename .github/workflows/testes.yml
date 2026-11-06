@@ -16,3 +16,14 @@ jobs:
         run: PYTHONPATH=src python -m unittest discover -s tests -v
       - name: Simulação de custos (precisa rodar sem erro)
         run: python scripts/simular_custos.py > /dev/null
+  n8n:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Testes dos nós Code
+        run: node --test n8n/tests/nos.test.mjs
+      - name: Workflows gerados batem com o código
+        run: python3 n8n/build.py && git diff --exit-code n8n/workflows

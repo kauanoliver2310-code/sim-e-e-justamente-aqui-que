@@ -16,6 +16,7 @@ link certo, acompanhamento) e a prospecção ativa vira canal secundário por e-
 | Pesquisado | Preços e limites (WhatsApp, Resend, LLMs, BrasilAPI, IBAMA, MTE), com status de verificação | `docs/02-pesquisa-fontes.md` |
 | Auditado | SOP original (13 problemas) e material do ChatGPT (1 erro de soma, 1 afirmação não confirmada) | `docs/01-diagnostico.md` |
 | Calculado | Custos em 3 cenários × 5 volumes, R$/lead, R$/reunião, ponto de equilíbrio | `relatorios/simulacao_custos.md` |
+| n8n | 2 workflows importáveis (entrada + envio aprovado), 15 testes dos nós | `n8n/` |
 | Implementado | Validação de CNPJ (incluindo alfanumérico), motor de compliance, cadastro com LGPD, outbox idempotente, agenda, validação da saída da IA | `src/kauan_ai/` |
 | Testado | **57 testes automatizados passando** | `tests/` |
 | **Não** testado | Integrações reais (n8n, Meta, BrasilAPI ao vivo, Calendar): nenhuma chamada externa foi feita | Fase 1 do plano |
