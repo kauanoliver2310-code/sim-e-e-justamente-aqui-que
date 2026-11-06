@@ -10,7 +10,7 @@ Dois workflows prontos para importar (`workflows/`):
 ## Passo a passo
 
 1. **Planilha Google** com 2 abas e estes cabeçalhos na linha 1 (exatamente assim):
-   - `Aprovacao`: `chave | telefone | nome | mensagem_cliente | recebido_em | intencao | confianca | rascunho | proximo_passo | status | motivo | aprovado_por | enviado_em | ref_envio | criado_em`
+   - `Aprovacao`: `chave | telefone | mensagem_cliente | recebido_em | intencao | confianca | rascunho | proximo_passo | status | motivo | aprovado_por | enviado_em | ref_envio | criado_em`
    - `Supressao`: `chave | canal | motivo | registrado_em`
 2. **Importar** os 2 JSON no n8n (menu Workflows → Import from file).
 3. **Credenciais** no n8n:
@@ -22,6 +22,12 @@ Dois workflows prontos para importar (`workflows/`):
 6. Ative o 01. Mande um "oi" do seu celular para o número → deve aparecer a linha na aba Aprovacao.
 7. **Rotina de aprovação**: edite o `rascunho` se quiser, escreva seu nome em `aprovado_por` e mude o `status` para `APROVADA`.
 8. Ative o 02 em `dry_run: true` → status vira `SIMULADA`. Só quando confiar, mude para `false`.
+
+## Privacidade (LGPD)
+- A planilha guarda só telefone (necessário para responder) e até 500 caracteres da mensagem. **Nome não é gravado.**
+- O workflow 02 apaga telefone e mensagem de linhas finalizadas após `retencao_dias` (padrão 30).
+- A aba Supressao guarda só o hash do telefone.
+- A planilha deve ser privada: compartilhada só com você, conta Google com verificação em 2 etapas, e a credencial do n8n com acesso só a ela.
 
 ## Status na aba Aprovacao
 `RASCUNHO` → (você) `APROVADA` → `ENVIADA` / `SIMULADA` / `BLOQUEADA` / `JANELA_EXPIRADA` / `FALHA`.

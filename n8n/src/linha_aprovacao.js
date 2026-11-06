@@ -16,7 +16,7 @@ return $input.all().map((r, k) => {
     } catch (e) { motivo = 'rascunho inválido da IA'; }
   }
   return { json: {
-    chave: 'r_' + j.wamid, telefone: j.telefone, nome: j.nome, mensagem_cliente: j.texto,
+    chave: 'r_' + j.wamid, telefone: j.telefone, mensagem_cliente: String(j.texto || '').slice(0, 500),
     recebido_em: j.recebido_em, intencao: j.intencao || '', confianca: j.confianca ?? '',
     rascunho, proximo_passo: passo, status, motivo,
     aprovado_por: '', enviado_em: '', ref_envio: '', criado_em: new Date().toISOString(),

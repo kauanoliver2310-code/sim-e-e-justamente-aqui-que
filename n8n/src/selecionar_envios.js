@@ -7,7 +7,13 @@ const agora = Date.now();
 const out = [];
 for (const i of $('Hash telefone').all()) {
   const j = i.json;
-  if (String(j.status || '').toUpperCase() !== 'APROVADA') continue;
+  const status = String(j.status || '').toUpperCase();
+  const FINAIS = ['ENVIADA', 'SIMULADA', 'BLOQUEADA', 'JANELA_EXPIRADA', 'FALHA', 'FILA_HUMANA', 'DESCARTADA'];
+  if (FINAIS.includes(status) && j.telefone && agora - Date.parse(j.criado_em || j.recebido_em) > (cfg.retencao_dias || 30) * 864e5) {
+    out.push({ json: { chave: j.chave, telefone: '', mensagem_cliente: '', motivo: 'anonimizado (retenção)', acao: 'atualizar' } });
+    continue;
+  }
+  if (status !== 'APROVADA') continue;
   const texto = String(j.rascunho || '').trim();
   const row = { chave: j.chave };
   if (st.enviados.includes(j.chave)) { row.status = 'ENVIADA'; row.motivo = 'já enviada (idempotência)'; row.acao = 'atualizar'; }

@@ -157,3 +157,14 @@ test('verificar_meta', () => {
   assert.equal(run('verificar_meta', { input: q('TROQUE_ESTE_TOKEN_DE_VERIFICACAO') })[0].challenge, '123');
   assert.equal(run('verificar_meta', { input: q('errado') })[0].ok, false);
 });
+
+test('privacidade: não grava nome e anonimiza linha finalizada antiga', () => {
+  const o = run('linha_aprovacao', { prefixo: "const MODO='humano';", input: items([{ wamid: 'w3', nome: 'Zé', texto: 'x'.repeat(900) }]) })[0];
+  assert.equal('nome' in o, false);
+  assert.equal(o.mensagem_cliente.length, 500);
+  const velho = new Date(Date.now() - 40 * 864e5).toISOString();
+  const a = envio([linha({ status: 'ENVIADA', criado_em: velho })])[0];
+  assert.equal(a.telefone, '');
+  assert.equal(a.mensagem_cliente, '');
+  assert.equal(envio([linha({ status: 'ENVIADA', criado_em: new Date().toISOString() })]).length, 0);
+});
