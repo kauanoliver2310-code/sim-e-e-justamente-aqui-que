@@ -8,21 +8,21 @@ Premissas: `config/premissas.json` (data de referência 2026-11-06). Orçamento 
 
 | Leads/mês | IA | E-mail | WhatsApp | Fixo | **Caixa** | Econômico | Reuniões | R$/lead | R$/reunião | ≤ orçamento |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---:|
-| 100 | R$ 8,40 | R$ 0,00 | R$ 20,00 | R$ 63,50 | **R$ 91,90** | R$ 331,90 | 0.4 | R$ 0,92 | R$ 204,22 | sim |
-| 500 | R$ 42,00 | R$ 0,00 | R$ 100,00 | R$ 63,50 | **R$ 205,50** | R$ 445,50 | 2.2 | R$ 0,41 | R$ 91,33 | sim |
-| 1000 | R$ 84,00 | R$ 0,00 | R$ 200,00 | R$ 63,50 | **R$ 347,50** | R$ 587,50 | 4.5 | R$ 0,35 | R$ 77,22 | NÃO |
-| 3000 | R$ 252,00 | R$ 120,00 | R$ 600,00 | R$ 63,50 | **R$ 1.035,50** | R$ 1.275,50 | 13.5 | R$ 0,35 | R$ 76,70 | NÃO |
-| 5000 | R$ 420,00 | R$ 120,00 | R$ 1.000,00 | R$ 63,50 | **R$ 1.603,50** | R$ 1.843,50 | 22.5 | R$ 0,32 | R$ 71,27 | NÃO |
+| 100 | R$ 8,40 | R$ 0,00 | R$ 16,09 | R$ 63,50 | **R$ 87,99** | R$ 327,99 | 0.4 | R$ 0,88 | R$ 195,52 | sim |
+| 500 | R$ 42,00 | R$ 0,00 | R$ 80,42 | R$ 63,50 | **R$ 185,93** | R$ 425,93 | 2.2 | R$ 0,37 | R$ 82,63 | sim |
+| 1000 | R$ 84,00 | R$ 0,00 | R$ 160,85 | R$ 63,50 | **R$ 308,35** | R$ 548,35 | 4.5 | R$ 0,31 | R$ 68,52 | NÃO |
+| 3000 | R$ 252,00 | R$ 120,00 | R$ 482,55 | R$ 63,50 | **R$ 918,05** | R$ 1.158,05 | 13.5 | R$ 0,31 | R$ 68,00 | NÃO |
+| 5000 | R$ 420,00 | R$ 120,00 | R$ 804,25 | R$ 63,50 | **R$ 1.407,75** | R$ 1.647,75 | 22.5 | R$ 0,28 | R$ 62,57 | NÃO |
 
 Alertas:
 - 100 leads: Menos de 1 reunião esperada no mês: volume baixo demais para medir
-- 1000 leads: Custo de caixa R$ 347.50 acima do orçamento R$ 250.00
+- 1000 leads: Custo de caixa R$ 308.35 acima do orçamento R$ 250.00
 - 1000 leads: WhatsApp marketing é mais da metade do custo
 - 3000 leads: E-mail excede faixa grátis (diário): plano pago necessário
-- 3000 leads: Custo de caixa R$ 1035.50 acima do orçamento R$ 250.00
+- 3000 leads: Custo de caixa R$ 918.05 acima do orçamento R$ 250.00
 - 3000 leads: WhatsApp marketing é mais da metade do custo
 - 5000 leads: E-mail excede faixa grátis (mensal): plano pago necessário
-- 5000 leads: Custo de caixa R$ 1603.50 acima do orçamento R$ 250.00
+- 5000 leads: Custo de caixa R$ 1407.75 acima do orçamento R$ 250.00
 - 5000 leads: WhatsApp marketing é mais da metade do custo
 
 ## Cenário intermediario
@@ -57,6 +57,24 @@ Alertas:
 Alertas:
 - 3000 leads: E-mail excede faixa grátis (mensal): plano pago necessário
 - 5000 leads: E-mail excede faixa grátis (mensal): plano pago necessário
+
+## Cenário inbound_fase1
+
+| Leads/mês | IA | E-mail | WhatsApp | Fixo | **Caixa** | Econômico | Reuniões | R$/lead | R$/reunião | ≤ orçamento |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---:|
+| 100 | R$ 0,66 | R$ 0,00 | R$ 0,00 | R$ 46,49 | **R$ 47,15** | R$ 227,15 | 30.0 | R$ 0,47 | R$ 1,57 | sim |
+| 500 | R$ 3,30 | R$ 0,00 | R$ 70,00 | R$ 46,49 | **R$ 119,79** | R$ 299,79 | 150.0 | R$ 0,24 | R$ 0,80 | sim |
+| 1000 | R$ 6,60 | R$ 0,00 | R$ 175,00 | R$ 46,49 | **R$ 228,09** | R$ 408,09 | 300.0 | R$ 0,23 | R$ 0,76 | sim |
+| 3000 | R$ 19,80 | R$ 0,00 | R$ 595,00 | R$ 46,49 | **R$ 661,29** | R$ 841,29 | 900.0 | R$ 0,22 | R$ 0,73 | NÃO |
+| 5000 | R$ 33,00 | R$ 0,00 | R$ 1.015,00 | R$ 46,49 | **R$ 1.094,49** | R$ 1.274,49 | 1500.0 | R$ 0,22 | R$ 0,73 | NÃO |
+
+Alertas:
+- 500 leads: WhatsApp marketing é mais da metade do custo
+- 1000 leads: WhatsApp marketing é mais da metade do custo
+- 3000 leads: Custo de caixa R$ 661.29 acima do orçamento R$ 250.00
+- 3000 leads: WhatsApp marketing é mais da metade do custo
+- 5000 leads: Custo de caixa R$ 1094.49 acima do orçamento R$ 250.00
+- 5000 leads: WhatsApp marketing é mais da metade do custo
 
 ## Conferência da tabela do ChatGPT (mesmas premissas dele)
 

@@ -20,7 +20,8 @@ def premissas_chatgpt():
              llm_preco_entrada_usd_mtok=0.10, llm_preco_saida_usd_mtok=0.60,
              llm_tokens_entrada_por_lead=2000, llm_tokens_saida_por_lead=500,
              taxa_qualificacao=1.0, fracao_qualificados_whatsapp=1.0,
-             preco_whatsapp_marketing_brl=0.3217, emails_por_lead_qualificado=0)
+             preco_whatsapp_marketing_brl=0.3217, emails_por_lead_qualificado=0,
+             llm_chamadas_por_lead=1, mensagens_servico_por_lead=0)
     return p
 
 
@@ -83,9 +84,21 @@ class TestCustos(unittest.TestCase):
         r = calcular(100, INTER)
         self.assertAlmostEqual(r.total_economico_brl - r.total_caixa_brl, 6 * 30)
 
+    def test_whatsapp_servico_franquia(self):
+        p = premissas_chatgpt()
+        p.update(fracao_qualificados_whatsapp=0.0, mensagens_servico_por_lead=6)
+        self.assertEqual(calcular(100, p).custo_whatsapp_brl, 0.0)        # 600 < 1.000 grátis
+        self.assertAlmostEqual(calcular(500, p).custo_whatsapp_brl, 2000 * 0.035)  # 3.000 - 1.000
+
+    def test_chamadas_multiplicam_ia(self):
+        p = premissas_chatgpt()
+        a = calcular(1000, p).custo_ia_brl
+        p["llm_chamadas_por_lead"] = 5
+        self.assertAlmostEqual(calcular(1000, p).custo_ia_brl, 5 * a)
+
     def test_simulacao_completa(self):
         rs = simular(DADOS)
-        self.assertEqual(len(rs), 3 * 5)
+        self.assertEqual(len(rs), len(DADOS["cenarios"]) * 5)
         # custo cresce com volume dentro do cenário
         for cen in DADOS["cenarios"]:
             tot = [r.total_caixa_brl for r in rs if r.cenario == cen]

@@ -2,13 +2,14 @@
 
 Fórmulas (L = leads processados no mês):
   qualificados      = L × taxa_qualificacao
-  custo_ia_usd      = L × (tok_in × preço_in + tok_out × preço_out) / 1e6  × (0,5 se batch)
+  custo_ia_usd      = L × chamadas × (tok_in × preço_in + tok_out × preço_out) / 1e6  × (0,5 se batch)
   custo_ia_brl      = custo_ia_usd × câmbio
   emails            = qualificados × emails_por_lead
   custo_email_brl   = 0 se emails ≤ grátis_mês E emails/dias_úteis ≤ grátis_dia
                       senão plano_pago_usd × câmbio
-  msgs_whatsapp     = qualificados × fração_whatsapp × msgs_por_lead
-  custo_whatsapp    = msgs_whatsapp × preço_msg_marketing
+  msgs_whatsapp     = qualificados × fração_whatsapp × msgs_por_lead          (marketing)
+  msgs_servico      = L × msgs_servico_por_lead                             (respostas a quem chamou)
+  custo_whatsapp    = msgs_whatsapp × preço_marketing + max(0, msgs_servico − franquia) × preço_serviço
   custo_enriq       = L × custo_enriquecimento_por_lead
   fixo              = infra + domínio
   total_caixa       = fixo + ia + email + whatsapp + enriquecimento
@@ -41,6 +42,8 @@ CAMPOS_OBRIGATORIOS = (
     "email_gratis_mes", "email_gratis_dia", "email_plano_pago_usd",
     "email_plano_pago_limite_mes", "taxa_resposta", "taxa_reuniao_sobre_resposta",
     "horas_manutencao_mes", "valor_hora_brl",
+    "llm_chamadas_por_lead", "mensagens_servico_por_lead", "franquia_servico_mes",
+    "preco_whatsapp_servico_brl",
 )
 
 
@@ -57,6 +60,7 @@ class ResultadoCusto:
     emails: float
     custo_email_brl: float
     msgs_whatsapp: float
+    msgs_servico: float
     custo_whatsapp_brl: float
     custo_enriquecimento_brl: float
     custo_fixo_brl: float
@@ -107,7 +111,7 @@ def calcular(leads: int, p: dict, cenario: str = "", orcamento_brl: float | None
 
     qualificados = leads * p["taxa_qualificacao"]
 
-    ia_usd = leads * (
+    ia_usd = leads * p["llm_chamadas_por_lead"] * (
         p["llm_tokens_entrada_por_lead"] * p["llm_preco_entrada_usd_mtok"]
         + p["llm_tokens_saida_por_lead"] * p["llm_preco_saida_usd_mtok"]
     ) / 1_000_000
@@ -127,7 +131,9 @@ def calcular(leads: int, p: dict, cenario: str = "", orcamento_brl: float | None
             alertas.append("E-mail excede também o plano pago de entrada: recotar")
 
     msgs_wa = qualificados * p["fracao_qualificados_whatsapp"] * p["mensagens_whatsapp_por_lead"]
-    wa_brl = msgs_wa * p["preco_whatsapp_marketing_brl"]
+    msgs_servico = leads * p["mensagens_servico_por_lead"]
+    excedente = max(0.0, msgs_servico - p["franquia_servico_mes"])
+    wa_brl = msgs_wa * p["preco_whatsapp_marketing_brl"] + excedente * p["preco_whatsapp_servico_brl"]
 
     enriq_brl = leads * p["custo_enriquecimento_por_lead_brl"]
     fixo = p["infra_mensal_brl"] + p["dominio_mensal_brl"]
@@ -148,7 +154,7 @@ def calcular(leads: int, p: dict, cenario: str = "", orcamento_brl: float | None
     return ResultadoCusto(
         cenario=cenario, leads=leads, qualificados=qualificados,
         custo_ia_brl=ia_brl, emails=emails, custo_email_brl=email_brl,
-        msgs_whatsapp=msgs_wa, custo_whatsapp_brl=wa_brl,
+        msgs_whatsapp=msgs_wa, msgs_servico=msgs_servico, custo_whatsapp_brl=wa_brl,
         custo_enriquecimento_brl=enriq_brl, custo_fixo_brl=fixo,
         total_caixa_brl=total, manutencao_brl=manut, total_economico_brl=total + manut,
         reunioes=reunioes, custo_por_lead_brl=total / leads,

@@ -38,6 +38,8 @@ def reproduzir_calculo_chatgpt() -> list[tuple[int, float, float, float]]:
         "email_plano_pago_usd": 20.0, "email_plano_pago_limite_mes": 50000,
         "taxa_resposta": 0.05, "taxa_reuniao_sobre_resposta": 0.4,
         "horas_manutencao_mes": 0, "valor_hora_brl": 0.0,
+        "llm_chamadas_por_lead": 1, "mensagens_servico_por_lead": 0,
+        "franquia_servico_mes": 1000, "preco_whatsapp_servico_brl": 0.035,
     }
     out = []
     for v in (100, 500, 1000, 3000, 5000):

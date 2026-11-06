@@ -7,6 +7,8 @@ Regras para todos os prompts:
 
 ---
 
+> **v1.1 (06/11):** a mensagem do cliente agora vai como string JSON (`mensagem_cliente: "..."`), não entre tags `<mensagem>`, para impedir fuga do delimitador (apontado na auditoria do ChatGPT). Fonte de verdade: `n8n/src/montar_p*.js`.
+
 ## P1 — Classificar mensagem recebida (v1.0)
 **Nó:** depois do webhook do WhatsApp. **Modelo:** Claude Haiku 5.5.
 

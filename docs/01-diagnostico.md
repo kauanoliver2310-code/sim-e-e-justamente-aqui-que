@@ -34,7 +34,7 @@ ao negócio do Kauan (vídeo curto → WhatsApp → link de indicação).
 | Tabela de custos (100 a 5.000 leads) | Reproduzida em código (`tests/test_custos.py`) | 4 linhas conferem. **A linha de 5.000 está errada**: publicou R$ 1.762,25; o correto é **R$ 1.652,25** (erro de soma de R$ 110). |
 | Resend grátis: 3.000/mês, 100/dia | Página oficial do Resend | **Confirmado.** |
 | Lista Suja semestral | Agência Gov / imprensa (atualizações em 06/04/2026 e 06/10/2026) | **Confirmado.** |
-| "IBAMA possui API governamental específica de embargos" | Não encontrei documentação pública dessa API. Achei o portal de consulta/certidão e serviços **pagos de terceiros** que automatizam o portal. | **Não confirmado.** APIs do catálogo Conecta gov.br costumam ser restritas a órgãos públicos. Pedir ao ChatGPT o link exato. |
+| "IBAMA possui API governamental específica de embargos" | Não encontrei documentação pública dessa API. Achei o portal de consulta/certidão e serviços **pagos de terceiros** que automatizam o portal. | **Corrigido:** o ChatGPT achou a API oficial SICAFI-AIE no catálogo Conecta (ver `docs/02`). Eu estava errado ao dizer que não existia. Falta testar. |
 | WhatsApp marketing R$ 0,3217/msg | Terceiros citam ~US$ 0,0625/msg para o Brasil (≈ R$ 0,34 com câmbio de R$ 5,50). Não consegui abrir o rate card oficial. | **Plausível, não confirmado.** |
 | Preço "GPT-6 Luna" US$ 0,10/0,60 | Não verificado por mim. | **Pendente.** O ChatGPT deve anexar a página oficial. |
 | Simulação manda WhatsApp de marketing para 100% dos leads | — | **Premissa errada** para leads frios: viola a regra de opt-in (item 2). |
